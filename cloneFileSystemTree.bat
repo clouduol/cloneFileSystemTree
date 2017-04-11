@@ -52,7 +52,7 @@ echo dira-d
 set fileCount=0
 ::using echo>>filenameONESPACEcontent, avoid integer 0,2,3,etc that defaut stream
 ::using "delims=" avoid space in %%i
-for /f “delims=” %%i in ('dir /A-D /B "%currentDirectory%\"') do echo>>%cloneFFile% %%i& echo>>%cloneFFile2% %%i& set /A fileCount+=1
+for /f "delims=" %%i in ('dir /A-D /B "%currentDirectory%\"') do echo>>%cloneFFile% %%i& echo>>%cloneFFile2% %%i& set /A fileCount+=1
 if %fileCount% neq 0 echo>>%cloneFFile% %fileCount%&echo>>%cloneFFile2% %fileCount%
 
 echo dirad
