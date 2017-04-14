@@ -1,7 +1,7 @@
 @echo off
 @rem chage page code to utf-8
 rem bug: sometimes, "for /f "delima=" %%i in['dir ...']" echo %%i is different from dir ...
-rem 		for example, directory "グレイテスト・マキシム" will be change to "グレイテスト?マキシム"
+rem		for example, directory "グレイテスト・マキシム" will be change to "グレイテスト?マキシム"
 rem fix: use chcp 65001, change code page to utf-8
 chcp 65001
 
@@ -10,6 +10,7 @@ date /t
 time /t
 @rem all directory paths are full and end without "\" && all driver marks are lower letters
 set "drivers=a b c d e f g h i j k l m n o p q r s t u v w x y z"
+@rem user dependent, set first
 set "cloneRootDirectory=d:\cloneFileSystemTree"
 set "cloneRootDirectory2=c:\cloneFileSystemTree"
 
@@ -85,50 +86,33 @@ setlocal
 	)
 
 	@rem clone file names
-	set fileCount=0
-	@rem ignore system files and directories
-	rem bug: using echo>>filenameONESPACEcontent, avoid integer 0,2,3,etc that for defaut stream
-	rem bug: using "delims=" avoid space in %%i
 	@rem avoid output "File Not Found" error
-	dir /A-D-S /B "\\?\%currentDirectory%\" > nul 2>&1
+	rem bug: use \\?\ before directory name, OR sometimes "..." tail cause error
+	dir /A-D-S "\\?\%currentDirectory%\" > nul 2>&1
 	if %errorlevel% equ 0 (
-		for /f "delims=" %%i in ('dir /A-D-S /B "\\?\%currentDirectory%\"') do (
-			echo>>"\\?\%cloneFFile%" %%i
-			echo>>"\\?\%cloneFFile2%" %%i
-			set /A fileCount+=1
-		)
-	)
-	if %fileCount% neq 0 (
-		echo>>"\\?\%cloneFFile%" %fileCount%
-		echo>>"\\?\%cloneFFile2%" %fileCount%
+		dir /A-D-S "\\?\%currentDirectory%\" > "\\?\%cloneFFile%"
+		dir /A-D-S "\\?\%currentDirectory%\" > "\\?\%cloneFFile2%"
 	)
 
-	@rem clone directories
-	set direCount=0
-	for /f "delims=" %%i in ('dir /AD-S /B "\\?\%currentDirectory%\"') do (
-		echo>>"\\?\%cloneDFile%" %%i
-		echo>>"\\?\%cloneDFile2%" %%i
-		set /A direCount+=1
-	)
-	if %direCount% neq 0 (
-		echo>>"\\?\%cloneDFile%" %direCount%
-		echo>>"\\?\%cloneDFile2%" %direCount%
-	)
-
-	@rem recursively clone
-	rem bug: using "" in brackets, avoid errors when %currentDirectory% contains bracket
+	@rem recursively clone, nested clone directory names
+	rem bug: using "" in brackts, avoid errors when %currentDirectory% contains bracket
 	rem bug: using "" around parameters, avoid directory that contains bracket ; actually, all directories should be around ""
-	if %direCount% neq 0 (
-		for /f "delims=" %%i in ('dir /AD-S /B "\\?\%currentDirectory%\"') do (
-			rem bug: directory name contains percent sign
-			echo "%%i" | findstr /C:"%%" > nul
-			if errorlevel 1 (
-				call :clone "%currentDirectory%","%%i"
-			) else (
-				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory%\%secondParam::=%_%%i_tree.txt"
-				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory2%\%secondParam::=%_%%i_tree.txt"
-			)
-		) 
+	for /f "delims=" %%i in ('dir /AD-S /B "\\?\%currentDirectory%\"') do (
+		if not exist "\\?\%cloneDFile%" (
+			dir /AD-S "\\?\%currentDirectory%\" > "\\?\%cloneDFile%"
+		)
+		if not exist "\\?\%cloneDFile2%" (
+			dir /AD-S "\\?\%currentDirectory%\" > "\\?\%cloneDFile2%"
+		)
+
+		@rem bug: four % pass one, to balance between % and ! is hard, so tree /f directly
+		echo "%%i" | findstr /C:"%%" > nul
+		if errorlevel 1 (
+			call :clone "%currentDirectory%","%%i"
+		) else (
+			tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory%\%secondParam::=%_%%i_tree.txt"
+			tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory2%\%secondParam::=%_%%i_tree.txt"
+		)
 	) 
 
 endlocal
