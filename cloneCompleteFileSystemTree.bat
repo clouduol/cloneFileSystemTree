@@ -45,10 +45,8 @@ goto:eof
 setlocal
 	@rem process input path
 	rem bug: delete "" around firstParam=%1 to avoid %1 contians &, like "this & that"
-	set firstParam=%1
-	set secondParam=%2
-	set "firstParam=%firstParam:"=%"
-	set "secondParam=%secondParam:"=%"
+	set "firstParam=%~1"
+	set "secondParam=%~2"
 
 	rem bug: using "" in set statement, avoid errors when %1 or %2 contains bracket
 	if "%firstParam%"=="root" (
@@ -61,12 +59,12 @@ setlocal
 	@rem to preserve consistency, use \\?\ in specific command
 	@rem echo>FILE is useful, md DIRECTORY is not useful
 	@rem for insurance reasons, chagne Registry[only for windows 10]
-	set "cloneCurrentDirectory=%cloneRootDirectory%\%currentDirectoryrem=%"
-	set "cloneCurrentDirectory2=%cloneRootDirectory2%\%currentDirectoryrem=%"
-	set "cloneFFile=%cloneCurrentDirectory%\%secondParamrem=%_files.txt"
-	set "cloneFFile2=%cloneCurrentDirectory2%\%secondParamrem=%_files.txt"
-	set "cloneDFile=%cloneCurrentDirectory%\%secondParamrem=%_directories.txt"
-	set "cloneDFile2=%cloneCurrentDirectory2%\%secondParamrem=%_directories.txt"
+	set "cloneCurrentDirectory=%cloneRootDirectory%\%currentDirectory::=%"
+	set "cloneCurrentDirectory2=%cloneRootDirectory2%\%currentDirectory::=%"
+	set "cloneFFile=%cloneCurrentDirectory%\%secondParam::=%_files.txt"
+	set "cloneFFile2=%cloneCurrentDirectory2%\%secondParam::=%_files.txt"
+	set "cloneDFile=%cloneCurrentDirectory%\%secondParam::=%_directories.txt"
+	set "cloneDFile2=%cloneCurrentDirectory2%\%secondParam::=%_directories.txt"
 
 	echo "%currentDirectory%"
 
@@ -118,7 +116,7 @@ setlocal
 	)
 
 	@rem recursively clone
-	rem bug: using "" in (), avoid errors when %currentDirectory% contains bracket
+	rem bug: using "" in brackets, avoid errors when %currentDirectory% contains bracket
 	rem bug: using "" around parameters, avoid directory that contains bracket ; actually, all directories should be around ""
 	if %direCount% neq 0 (
 		for /f "delims=" %%i in ('dir /AD-S /B "\\?\%currentDirectory%\"') do (
@@ -127,8 +125,8 @@ setlocal
 			if errorlevel 1 (
 				call :clone "%currentDirectory%","%%i"
 			) else (
-				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory%\%secondParamrem=%_%%i_tree.txt"
-				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory2%\%secondParamrem=%_%%i_tree.txt"
+				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory%\%secondParam::=%_%%i_tree.txt"
+				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory2%\%secondParam::=%_%%i_tree.txt"
 			)
 		) 
 	) 
