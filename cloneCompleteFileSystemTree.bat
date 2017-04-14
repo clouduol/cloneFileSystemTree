@@ -3,7 +3,7 @@
 :: bug: sometimes, "for /f "delima=" %%i in['dir ...']" echo %%i is different from dir ...
 :: 		for example, directory "グレイテスト・マキシム" will be change to "グレイテスト?マキシム"
 :: fix: use chcp 65001, change code page to utf-8
-::chcp 65001
+chcp 65001
 
 echo begin clone
 date /t
@@ -43,26 +43,21 @@ goto:eof
 @rem @param %2 current directory name
 :clone 
 setlocal
-	::echo begin new func
 	@rem process input path
 	:: bug: delete "" around firstParam=%1 to avoid %1 contians &, like "this & that"
 	set firstParam=%1
 	set secondParam=%2
 	set "firstParam=%firstParam:"=%"
 	set "secondParam=%secondParam:"=%"
-	::echo %1
-	::echo %2
 
-	::echo beginif
 	:: bug: using "" in set statement, avoid errors when %1 or %2 contains bracket
 	if "%firstParam%"=="root" (
 		set "currentDirectory=%secondParam%"
 	) else (
 		set "currentDirectory=%firstParam%\%secondParam%"
 	)
-	::echo endif
 
-	@rem use \\?\ magic prefix before driver mark c,d,etc to avoid long path more than 260 byte
+	@rem use \\?\ magic prefix before driver mark c,d,etc to avoid long path more than 260 bytes
 	@rem to preserve consistency, use \\?\ in specific command
 	@rem echo>FILE is useful, md DIRECTORY is not useful
 	@rem for insurance reasons, chagne Registry[only for windows 10]
@@ -73,18 +68,9 @@ setlocal
 	set "cloneDFile=%cloneCurrentDirectory%\%secondParam::=%_directories.txt"
 	set "cloneDFile2=%cloneCurrentDirectory2%\%secondParam::=%_directories.txt"
 
-
-	::echo "%firstParam%"
-	::echo "%secondParam%"
 	echo "%currentDirectory%"
-	::echo "%cloneCurrentDirectory%"
-	::echo "%cloneCurrentDirectory2%"
-	::echo "%cloneFFile%"
-	::echo "%cloneFFile2%"
-	::echo "%cloneDFile%"
-	::echo "%cloneDFile2%"
 
-	::echo filter
+	@rem filter
 	if "%cloneRootDirectory%"=="%currentDirectory%" (
 		goto:eof
 	)
@@ -92,7 +78,7 @@ setlocal
 		goto:eof
 	)
 
-	::echo md
+	@rem  create clone directory
 	if not exist "\\?\%cloneCurrentDirectory%" (
 		md "\\?\%cloneCurrentDirectory%\"
 	)
@@ -100,7 +86,7 @@ setlocal
 		md "\\?\%cloneCurrentDirectory2%\"
 	)
 
-	::echo dira-d
+	@rem clone file names
 	set fileCount=0
 	@rem ignore system files and directories
 	:: bug: using echo>>filenameONESPACEcontent, avoid integer 0,2,3,etc that for defaut stream
@@ -119,7 +105,7 @@ setlocal
 		echo>>"\\?\%cloneFFile2%" %fileCount%
 	)
 
-	::echo dirad
+	@rem clone directories
 	set direCount=0
 	for /f "delims=" %%i in ('dir /AD-S /B "\\?\%currentDirectory%\"') do (
 		echo>>"\\?\%cloneDFile%" %%i
@@ -131,7 +117,7 @@ setlocal
 		echo>>"\\?\%cloneDFile2%" %direCount%
 	)
 
-	::echo forf
+	@rem recursively clone
 	:: bug: using "" in (), avoid errors when %currentDirectory% contains bracket
 	:: bug: using "" around parameters, avoid directory that contains bracket ; actually, all directories should be around ""
 	if %direCount% neq 0 (
