@@ -1,8 +1,8 @@
 @echo off
 @rem chage page code to utf-8
-:: bug: sometimes, "for /f "delima=" %%i in['dir ...']" echo %%i is different from dir ...
-:: 		for example, directory "グレイテスト・マキシム" will be change to "グレイテスト?マキシム"
-:: fix: use chcp 65001, change code page to utf-8
+rem bug: sometimes, "for /f "delima=" %%i in['dir ...']" echo %%i is different from dir ...
+rem 		for example, directory "グレイテスト・マキシム" will be change to "グレイテスト?マキシム"
+rem fix: use chcp 65001, change code page to utf-8
 chcp 65001
 
 echo begin clone
@@ -44,13 +44,13 @@ goto:eof
 :clone 
 setlocal
 	@rem process input path
-	:: bug: delete "" around firstParam=%1 to avoid %1 contians &, like "this & that"
+	rem bug: delete "" around firstParam=%1 to avoid %1 contians &, like "this & that"
 	set firstParam=%1
 	set secondParam=%2
 	set "firstParam=%firstParam:"=%"
 	set "secondParam=%secondParam:"=%"
 
-	:: bug: using "" in set statement, avoid errors when %1 or %2 contains bracket
+	rem bug: using "" in set statement, avoid errors when %1 or %2 contains bracket
 	if "%firstParam%"=="root" (
 		set "currentDirectory=%secondParam%"
 	) else (
@@ -61,12 +61,12 @@ setlocal
 	@rem to preserve consistency, use \\?\ in specific command
 	@rem echo>FILE is useful, md DIRECTORY is not useful
 	@rem for insurance reasons, chagne Registry[only for windows 10]
-	set "cloneCurrentDirectory=%cloneRootDirectory%\%currentDirectory::=%"
-	set "cloneCurrentDirectory2=%cloneRootDirectory2%\%currentDirectory::=%"
-	set "cloneFFile=%cloneCurrentDirectory%\%secondParam::=%_files.txt"
-	set "cloneFFile2=%cloneCurrentDirectory2%\%secondParam::=%_files.txt"
-	set "cloneDFile=%cloneCurrentDirectory%\%secondParam::=%_directories.txt"
-	set "cloneDFile2=%cloneCurrentDirectory2%\%secondParam::=%_directories.txt"
+	set "cloneCurrentDirectory=%cloneRootDirectory%\%currentDirectoryrem=%"
+	set "cloneCurrentDirectory2=%cloneRootDirectory2%\%currentDirectoryrem=%"
+	set "cloneFFile=%cloneCurrentDirectory%\%secondParamrem=%_files.txt"
+	set "cloneFFile2=%cloneCurrentDirectory2%\%secondParamrem=%_files.txt"
+	set "cloneDFile=%cloneCurrentDirectory%\%secondParamrem=%_directories.txt"
+	set "cloneDFile2=%cloneCurrentDirectory2%\%secondParamrem=%_directories.txt"
 
 	echo "%currentDirectory%"
 
@@ -89,8 +89,8 @@ setlocal
 	@rem clone file names
 	set fileCount=0
 	@rem ignore system files and directories
-	:: bug: using echo>>filenameONESPACEcontent, avoid integer 0,2,3,etc that for defaut stream
-	:: bug: using "delims=" avoid space in %%i
+	rem bug: using echo>>filenameONESPACEcontent, avoid integer 0,2,3,etc that for defaut stream
+	rem bug: using "delims=" avoid space in %%i
 	@rem avoid output "File Not Found" error
 	dir /A-D-S /B "\\?\%currentDirectory%\" > nul 2>&1
 	if %errorlevel% equ 0 (
@@ -118,11 +118,18 @@ setlocal
 	)
 
 	@rem recursively clone
-	:: bug: using "" in (), avoid errors when %currentDirectory% contains bracket
-	:: bug: using "" around parameters, avoid directory that contains bracket ; actually, all directories should be around ""
+	rem bug: using "" in (), avoid errors when %currentDirectory% contains bracket
+	rem bug: using "" around parameters, avoid directory that contains bracket ; actually, all directories should be around ""
 	if %direCount% neq 0 (
 		for /f "delims=" %%i in ('dir /AD-S /B "\\?\%currentDirectory%\"') do (
-			call :clone "%currentDirectory%","%%i"
+			rem bug: directory name contains percent sign
+			echo "%%i" | findstr /C:"%%" > nul
+			if errorlevel 1 (
+				call :clone "%currentDirectory%","%%i"
+			) else (
+				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory%\%secondParamrem=%_%%i_tree.txt"
+				tree /F "%currentDirectory%\%%i" > "%cloneCurrentDirectory2%\%secondParamrem=%_%%i_tree.txt"
+			)
 		) 
 	) 
 
