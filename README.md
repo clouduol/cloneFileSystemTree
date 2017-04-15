@@ -4,7 +4,7 @@ Windows batch file for cloning file system tree
 This windows batch file will clone complete file system tree of your windows. However, it may be very slow. For example, 2 hours.  
 You can change variables cloneRootDirectory and cloneRootDirectory2 to decide where to store file system tree.
 ## clonePartialFileSystemTree.bat
-This windows batch file will clone file system tree of your windows, and you can set clone directory depth. It is much faster than cloneCompleteFileSystemTree.bat. For example, 30 minutes.  
+This windows batch file will clone file system tree of your windows, and you can set clone directory depth. It is much faster than cloneCompleteFileSystemTree.bat. For example, 30 minutes,even 3 minutes.  
 You can change variables cloneRootDirectory and cloneRootDirectory2 to decide where to store file system tree.  
 You can change variable maxDepth to decide clone directory depth, smaller,faster.
 ## CAUTION
