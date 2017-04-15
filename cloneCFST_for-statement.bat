@@ -35,7 +35,6 @@ echo clone end
 set drivers=
 set cloneRootDirectory=
 set cloneRootDirectory2=
-set maxDepth=
 goto:eof
 
 
